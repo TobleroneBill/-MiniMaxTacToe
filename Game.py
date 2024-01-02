@@ -9,7 +9,7 @@ CLOCK = pygame.time.Clock()
 MouseRaw = [0,0]
 
 # Game Settings
-BoardSize = (4,3)
+BoardSize = (3,3)
 CursorSize = 5
 dividerSpacing = 10 #px
 
@@ -40,7 +40,12 @@ class GameManager():
 
     def pprintBoard(self):
         print('-----------------------------------------------')
-        print('\n'.join([x for x in [y for y in self.Board]]))
+        # prstr = ''
+        # for i,x in enumerate(self.Board):
+        #     prstr += str(self.Board[i])
+        #     prstr += '\n'
+        # print(prstr)
+        print(self.Board)
         print('-----------------------------------------------')
 
     # --------------------- Logic ---------------------    
@@ -86,16 +91,47 @@ class GameManager():
             for i,x in enumerate(self.GridRecs):
                 for j,square in enumerate(x):
                     if square.collidepoint(pygame.mouse.get_pos()):
-                        self.SetSquare(j-1,i-1)
+                        self.SetSquare(i,j)
+                        self.CheckWinner()
 
     def SetSquare(self,x,y):
+        x=x-1
+        y=y-1
+        if self.Board[y][x] != 0:
+            return
         if self.Cross:
-            self.Board[x][y] = 1
+            self.Board[y][x] = 1
         else:
-            self.Board[x][y] = 2
+            self.Board[y][x] = 2
         self.Cross = not self.Cross
-        # self.pprintBoard()
+        self.pprintBoard()
+    
+    #TODO: Checks if someone has won -- 2D ARRAYS NEED WORKING ON - if i cant tell how its structured, then i cant fix it :/
+    def CheckWinner(self):
+        #    x-1y-1,xy-1,x+1y-1
+        # check x-1y,xy,x+1y
+        #    x-1y+1,xy+1,x+1y+1
         
+        for y,col in enumerate(self.Board):
+            # Check horizontals
+            for x,row in enumerate(col):
+                # above = [self.Board[i-1][j-1],self.Board[i][j-1],self.Board[i+1][j-1]]
+
+                # this is not the way brother
+                if x == 0:
+                    above = col[x]
+                else:
+                    above = col[x+1]
+
+                if len(col)-1 == x:
+                    below = col[x]
+                else:
+                    below = col[x-1]
+
+                print(f'above: {above} - below: {below}')
+                print(self.Board[i][j])
+
+
     # --------------------- Draw ---------------------    
     def DrawBoard(self):
         # Draw lines for each grid section
@@ -129,18 +165,26 @@ class GameManager():
 
 # For Fun
 def ChangingSize(GM):
+    changed = False
     if pygame.key.get_pressed()[pygame.K_LEFT]:
         if GM.size[0]-1 >= 3:
             GM.size = (GM.size[0]-1,GM.size[1])
+            changed = True
+
     if pygame.key.get_pressed()[pygame.K_RIGHT]:
         GM.size = (GM.size[0]+1,GM.size[1])
+        changed = True
     
     if pygame.key.get_pressed()[pygame.K_UP]:
         GM.size = (GM.size[0],GM.size[1]+1)
+        changed = True
     if pygame.key.get_pressed()[pygame.K_DOWN]:
         if GM.size[1]-1 >= 3:
             GM.size = (GM.size[0],GM.size[1]-1)
+            changed = True
 
+    if not changed:
+        return
     GM.GetDividerSize()
     GM.GridRecs = []
     GM.Board = GameManager.MakeBoard(GM.size) 
