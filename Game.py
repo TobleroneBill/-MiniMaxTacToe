@@ -25,7 +25,6 @@ class GameManager():
         self.prevMouse = pygame.mouse.get_pos()
 
         self.Board = GameManager.MakeBoard(self.size) 
-        # print(self.Board)
 
         self.Cross = True
 
@@ -92,7 +91,6 @@ class GameManager():
                 for j,square in enumerate(x):
                     if square.collidepoint(pygame.mouse.get_pos()):
                         self.SetSquare(i,j)
-                        self.CheckWinner()
 
     def SetSquare(self,x,y):
         x=x-1
@@ -104,6 +102,7 @@ class GameManager():
         else:
             self.Board[y][x] = 2
         self.Cross = not self.Cross
+        self.CheckWinner()
         self.pprintBoard()
     
     #TODO: Checks if someone has won -- 2D ARRAYS NEED WORKING ON - if i cant tell how its structured, then i cant fix it :/
@@ -111,26 +110,47 @@ class GameManager():
         #    x-1y-1,xy-1,x+1y-1
         # check x-1y,xy,x+1y
         #    x-1y+1,xy+1,x+1y+1
+        print(len(self.Board[0])-1)
+        print(len(self.Board)-1)
         
-        for y,col in enumerate(self.Board):
-            # Check horizontals
-            for x,row in enumerate(col):
-                # above = [self.Board[i-1][j-1],self.Board[i][j-1],self.Board[i+1][j-1]]
+        for x,col in enumerate(self.Board):
+            for y,row in enumerate(col):
+                # print(x,col,y,row)
+                if row != 0:
+                    self.CheckAround()
+    
+    # check spaces around given position
+    # Think best solution is to just check: 
+    # horizontal
+    # vertical
+    # diagonal
+    def CheckAround(self):
+        print('checkardoun')
 
-                # this is not the way brother
-                if x == 0:
-                    above = col[x]
-                else:
-                    above = col[x+1]
+        # Horizontal
+        for row in self.Board:
+            for i,pos in enumerate(row):
+                if len(row)-1 > i+1:
+                    if row[i+1] == 1 and row[i+2] == 1: #Xs
+                        print('p1 wins Horizontal')
+                    if row[i+1] == 2 and row[i+2] == 2: #Os
+                        print('p2 wins Horizontal')
 
-                if len(col)-1 == x:
-                    below = col[x]
-                else:
-                    below = col[x-1]
+        # Vertical
+        # Could flatten the board
+        flatboard = []
+        boardLen = len(self.Board)
+        for i,v in enumerate(self.Board):
+            flatboard += v
 
-                print(f'above: {above} - below: {below}')
-                print(self.Board[i][j])
-
+        print('flatboard:')
+        print(flatboard)
+        for i in range(boardLen):
+            print(flatboard[i],flatboard[i+boardLen],flatboard[i+(boardLen*2)])
+            if flatboard[i] == 1 and flatboard[i+boardLen] == 1 and flatboard[i+(boardLen*2)] == 1:
+                print('vertical p1')
+            if flatboard[i] == 2 and flatboard[i+boardLen] == 2 and flatboard[i+(boardLen*2)] == 2:
+                print('vertical p2')
 
     # --------------------- Draw ---------------------    
     def DrawBoard(self):
